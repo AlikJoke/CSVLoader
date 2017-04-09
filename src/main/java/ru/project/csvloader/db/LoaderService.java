@@ -1,7 +1,6 @@
 package ru.project.csvloader.db;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
@@ -50,10 +49,10 @@ public interface LoaderService {
 	 * Получение файла из некоторой директории для загрузки в БД.
 	 * <p>
 	 * 
-	 * @see FileReader
+	 * @see File
 	 * @throws IOException
 	 * @return может быть {@code null}.
 	 */
 	@Null
-	FileReader getFile() throws Exception;
+	File getFile() throws Exception;
 }

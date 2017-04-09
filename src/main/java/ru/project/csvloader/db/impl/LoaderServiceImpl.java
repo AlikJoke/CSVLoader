@@ -3,6 +3,7 @@ package ru.project.csvloader.db.impl;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.opencsv.CSVReader;
 
 import ru.project.csvloader.db.LoaderService;
@@ -44,6 +48,8 @@ public class LoaderServiceImpl implements LoaderService {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
+	private static final Logger log = LoggerFactory.getLogger(LoaderServiceImpl.class);
+
 	@PostConstruct
 	public void checkInit() {
 		if (!StringUtils.hasLength(this.placeHolder))
@@ -57,7 +63,9 @@ public class LoaderServiceImpl implements LoaderService {
 	public List<Data> loadToObjects() throws IOException {
 		if (this.getFile() == null)
 			return Collections.emptyList();
-		CSVReader reader = new CSVReader(this.getFile());
+		FileReader fileReader = new FileReader(this.getFile());
+		CSVReader reader = new CSVReader(
+				new InputStreamReader(Files.asByteSource(this.getFile()).openStream(), fileReader.getEncoding()));
 		List<Data> dataList = Lists.newArrayList();
 		String[] line;
 		try {
@@ -66,16 +74,17 @@ public class LoaderServiceImpl implements LoaderService {
 						Double.parseDouble(line[2])));
 		} finally {
 			reader.close();
+			fileReader.close();
 		}
 		return dataList;
 	}
 
 	@Override
-	public FileReader getFile() throws IOException {
+	public File getFile() throws IOException {
 		File file = new File(this.placeHolder);
 		if (!file.exists())
 			return null;
-		return new FileReader(this.placeHolder);
+		return file;
 	}
 
 	@Override
@@ -86,8 +95,12 @@ public class LoaderServiceImpl implements LoaderService {
 			if ((dataList = this.loadToObjects()).isEmpty())
 				return;
 
+			dataList.stream().forEach(data -> log.debug(data.toString()));
 			List<Data> dataListFinal = dataList.stream().filter(data -> this.isExists(data.getDate()))
 					.collect(Collectors.toList());
+
+			dataListFinal.stream().forEach(data -> log.debug(data.toString()));
+
 			if (!dataListFinal.isEmpty())
 				jdbcTemplate.batchUpdate(JdbcUtils.INSERT_QUERY, new BatchPreparedStatementSetter() {
 
