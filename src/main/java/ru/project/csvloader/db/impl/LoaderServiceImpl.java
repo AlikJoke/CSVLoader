@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,7 +62,8 @@ public class LoaderServiceImpl implements LoaderService {
 		String[] line;
 		try {
 			while ((line = reader.readNext()) != null)
-				dataList.add(new Data(line[0], line[1], Double.parseDouble(line[2])));
+				dataList.add(new Data(line[0], LocalDateTime.parse(line[1], DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+						Double.parseDouble(line[2])));
 		} finally {
 			reader.close();
 		}
@@ -90,7 +94,7 @@ public class LoaderServiceImpl implements LoaderService {
 					@Override
 					public void setValues(PreparedStatement ps, int pos) throws SQLException {
 						ps.setString(1, dataListFinal.get(pos).getName());
-						ps.setString(2, dataListFinal.get(pos).getDate());
+						ps.setTimestamp(2, Timestamp.valueOf(dataListFinal.get(pos).getDate()));
 						ps.setDouble(3, dataListFinal.get(pos).getValue());
 						ps.setString(4, dataListFinal.get(pos).getSmth());
 					}
@@ -106,12 +110,12 @@ public class LoaderServiceImpl implements LoaderService {
 	}
 
 	@Transactional(readOnly = true)
-	public boolean isExists(final String date) {
+	public boolean isExists(final LocalDateTime date) {
 		return jdbcTemplate.query(JdbcUtils.SELECT_QUERY, new PreparedStatementSetter() {
 
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
-				ps.setString(1, date);
+				ps.setTimestamp(1, Timestamp.valueOf(date));
 			}
 
 		}, new DataMapper()).isEmpty();
@@ -123,7 +127,7 @@ class DataMapper implements RowMapper<Data> {
 	@Override
 	public Data mapRow(ResultSet rs, int rowNum) throws SQLException {
 		Data data = new Data();
-		data.setDate(rs.getString("date"));
+		data.setDate(rs.getTimestamp("date").toLocalDateTime());
 		data.setName(rs.getString("name"));
 		data.setValue(rs.getDouble("value"));
 		data.setSmth(rs.getString("smth"));

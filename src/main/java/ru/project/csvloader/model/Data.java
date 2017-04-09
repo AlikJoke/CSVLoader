@@ -1,8 +1,21 @@
 package ru.project.csvloader.model;
 
-public class Data {
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
-	public Data(String name, String date, Double value) {
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Past;
+
+public class Data implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4393556451584525022L;
+
+	public Data(String name, LocalDateTime date, Double value) {
 		super();
 		this.name = name;
 		this.date = date;
@@ -12,9 +25,18 @@ public class Data {
 	public Data() {
 	}
 
+	@NotNull
+	@Max(255)
 	private String name;
-	private String date;
+
+	@NotNull
+	@Past
+	private LocalDateTime date;
+
+	@NotNull
 	private Double value;
+
+	@Null
 	private String smth;
 
 	public String getName() {
@@ -25,11 +47,11 @@ public class Data {
 		this.name = name;
 	}
 
-	public String getDate() {
+	public LocalDateTime getDate() {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
 

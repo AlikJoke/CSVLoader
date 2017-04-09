@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 
 import com.opencsv.CSVReader;
@@ -32,6 +33,7 @@ public interface LoaderService {
 	 * @throws IOException
 	 * @return список объектов для загрузки.
 	 */
+	@NotNull
 	List<Data> loadToObjects() throws IOException;
 
 	/**
