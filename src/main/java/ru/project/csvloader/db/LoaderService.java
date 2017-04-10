@@ -2,6 +2,8 @@ package ru.project.csvloader.db;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -27,8 +29,6 @@ public interface LoaderService {
 	 * 
 	 * @see CSVReader
 	 * @see Data
-	 * @param csv
-	 *            - файл для загрузки, не может быть {@code null}.
 	 * @throws IOException
 	 * @return список объектов для загрузки.
 	 */
@@ -40,8 +40,6 @@ public interface LoaderService {
 	 * <p>
 	 * 
 	 * @see File
-	 * @param csv
-	 *            - файл для загрузки, не может быть {@code null}.
 	 */
 	void loadToDB();
 
@@ -55,4 +53,26 @@ public interface LoaderService {
 	 */
 	@Null
 	File getFile() throws Exception;
+
+	/**
+	 * Получение всех записей из БД.
+	 * <p>
+	 * 
+	 * @see Data
+	 * @return не может быть {@code null}. Если записей нет, возвращается
+	 *         {@linkplain Collections#EMPTY_LIST}.
+	 */
+	@NotNull
+	List<Data> getAll();
+
+	/**
+	 * Получение записи по дате.
+	 * <p>
+	 * 
+	 * @see Data
+	 * @see LocalDateTime
+	 * @return может быть {@code null}.
+	 */
+	@NotNull
+	Data getByDate(@NotNull LocalDateTime dateTime);
 }
