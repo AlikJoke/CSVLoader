@@ -21,17 +21,23 @@ import com.google.common.base.Objects;
 import com.google.common.net.MediaType;
 
 import ru.project.csvloader.db.LoaderService;
+import ru.project.csvloader.event.dispatcher.EventDispatcher;
 import ru.project.csvloader.web.Reference;
 import ru.project.csvloader.web.json.RestResponse;
 
 @Service
 public class ReferenceImpl implements Reference {
 
+	static final String PATH = "/loader";
+
 	@Autowired
 	private LoaderService loaderService;
 
 	@Autowired
 	private ApplicationContext context;
+
+	@Autowired
+	private EventDispatcher dispatcher;
 
 	@Resource(name = "placeHolder")
 	private String placeHolder;
@@ -44,8 +50,6 @@ public class ReferenceImpl implements Reference {
 		if (this.context == null)
 			throw new RuntimeException("Application context isn't injected yet!");
 	}
-
-	static final String PATH = "/loader";
 
 	@Override
 	public RestResponse doGetByDate(String date) {
@@ -71,7 +75,7 @@ public class ReferenceImpl implements Reference {
 					} catch (IllegalStateException | IOException e) {
 						throw new RuntimeException(e);
 					}
-					loaderService.loadToDB();
+					dispatcher.dispatch();
 				});
 	}
 
@@ -91,7 +95,7 @@ public class ReferenceImpl implements Reference {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		loaderService.loadToDB();
+		dispatcher.dispatch();
 	}
 
 }
