@@ -1,5 +1,7 @@
 package ru.project.csvloader.schedules;
 
+import ru.project.csvloader.orm.model.item.Role;
+
 /**
  * Интерфейс для запуска задач с помощью планировщика.
  * 
@@ -14,4 +16,16 @@ public interface ScheduledTask {
 	 * Запуск задачи по загрузке данных из csv.
 	 */
 	void scheduledLoad();
+
+	/**
+	 * Отключение фоновой задачи загрузки данных. Доступно только пользователю с
+	 * ролью {@linkplain Role#ADMIN}.
+	 */
+	void disableSheduling();
+
+	/**
+	 * Включение фоновой задачи загрузки данных. Доступно только пользователю с
+	 * ролью {@linkplain Role#ADMIN}.
+	 */
+	void enableSheduling();
 }
