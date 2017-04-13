@@ -71,7 +71,7 @@ public class LoaderServiceImpl implements LoaderService {
 	}
 
 	@Override
-	public List<Data> loadToObjects() throws IOException {
+	public synchronized List<Data> loadToObjects() throws IOException {
 		if (this.getFile() == null)
 			return Collections.emptyList();
 		FileReader fileReader = new FileReader(this.getFile());
@@ -86,7 +86,6 @@ public class LoaderServiceImpl implements LoaderService {
 		} finally {
 			reader.close();
 			fileReader.close();
-			// this.getFile().delete();
 		}
 		return dataList;
 	}

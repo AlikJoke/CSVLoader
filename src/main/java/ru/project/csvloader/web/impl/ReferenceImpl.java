@@ -22,8 +22,12 @@ import com.google.common.net.MediaType;
 
 import ru.project.csvloader.db.LoaderService;
 import ru.project.csvloader.event.dispatcher.EventDispatcher;
+import ru.project.csvloader.orm.dao.UserService;
+import ru.project.csvloader.orm.model.FileItem;
+import ru.project.csvloader.orm.model.User;
 import ru.project.csvloader.web.Reference;
 import ru.project.csvloader.web.json.RestResponse;
+import ru.project.csvloader.web.ui.CurrentUser;
 
 @Service
 public class ReferenceImpl implements Reference {
@@ -34,7 +38,13 @@ public class ReferenceImpl implements Reference {
 	private LoaderService loaderService;
 
 	@Autowired
+	private UserService userService;
+
+	@Autowired
 	private ApplicationContext context;
+
+	@Autowired
+	private CurrentUser currentUser;
 
 	@Autowired
 	private EventDispatcher dispatcher;
@@ -74,6 +84,10 @@ public class ReferenceImpl implements Reference {
 						file.transferTo(tempFile);
 					} catch (IllegalStateException | IOException e) {
 						throw new RuntimeException(e);
+					} finally {
+						User user = userService.getUserByUsername(currentUser.getCurrentUser().getUsername());
+						user.getFiles().add(new FileItem(tempFile));
+						userService.loadUser(user);
 					}
 					dispatcher.dispatch();
 				});
@@ -94,6 +108,12 @@ public class ReferenceImpl implements Reference {
 			outStream.close();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		} finally {
+			if (tempFile.length() > 0) {
+				User user = userService.getUserByUsername(currentUser.getCurrentUser().getUsername());
+				user.getFiles().add(new FileItem(tempFile));
+				userService.loadUser(user);
+			}
 		}
 		dispatcher.dispatch();
 	}

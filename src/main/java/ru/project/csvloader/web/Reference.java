@@ -21,7 +21,7 @@ import ru.project.csvloader.web.json.RestResponse;
  * @version 1.0.0
  *
  */
-public interface Reference {
+public interface Reference extends OptionsReference {
 
 	/**
 	 * Получение записи по дате-времени.
@@ -73,18 +73,7 @@ public interface Reference {
 	 */
 	void doPostByUrl(@NotNull String url);
 
-	/**
-	 * Выполняет OPTIONS-запрос для получения допустимых методов.
-	 * <p>
-	 * 
-	 * @see HttpServletResponse
-	 * @see HttpServletRequest
-	 * 
-	 * @param request
-	 *            - запрос к серверу.
-	 * @param response
-	 *            - ответ сервера.
-	 */
+	@Override
 	default void doOptions(HttpServletRequest request, HttpServletResponse response) {
 		response.addHeader("Allow", "GET, POST, OPTIONS");
 	}

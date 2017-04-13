@@ -76,14 +76,10 @@ public interface UserService {
 	 * @see User
 	 * @see Role
 	 * 
-	 * @param username
-	 *            - имя пользователя, не может быть {@code null}.
-	 * @param password
-	 *            - пароль пользователя, не может быть {@code null}.
-	 * @param role
-	 *            - роль пользователя, не может быть {@code null}.
+	 * @param user
+	 *            - объект пользователя, не может быть {@code null}.
 	 * 
 	 * @return может быть {@code null}.
 	 */
-	void loadUser(@NotNull String username, @NotNull String password, @NotNull Role role);
+	void loadUser(@NotNull User user);
 }

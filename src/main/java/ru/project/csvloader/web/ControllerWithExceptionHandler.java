@@ -16,7 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
  *
  */
 public abstract class ControllerWithExceptionHandler {
-
+	
 	@ExceptionHandler(value = RuntimeException.class)
 	public void handle(RuntimeException e, HttpServletResponse response, HttpServletRequest request) {
 		writeStatusAndMessageIntoResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
