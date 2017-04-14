@@ -11,6 +11,7 @@ import javax.validation.constraints.Null;
 
 import com.opencsv.CSVReader;
 
+import ru.project.csvloader.file.pool.model.FileWrapper;
 import ru.project.csvloader.model.Data;
 
 /**
@@ -47,12 +48,12 @@ public interface LoaderService {
 	 * Получение файла из некоторой директории для загрузки в БД.
 	 * <p>
 	 * 
-	 * @see File
+	 * @see FileWrapper
 	 * @throws IOException
 	 * @return может быть {@code null}.
 	 */
 	@Null
-	File getFile() throws Exception;
+	FileWrapper getFileWrapper() throws Exception;
 
 	/**
 	 * Получение всех записей из БД.

@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -79,7 +80,7 @@ public class ReferenceImpl implements Reference {
 				.filter(file -> (Objects.equal(MediaType.CSV_UTF_8, MediaType.parse(file.getContentType()))
 						|| Objects.equal(MediaType.OCTET_STREAM, MediaType.parse(file.getContentType()))))
 				.forEach(file -> {
-					File tempFile = new File(placeHolder);
+					File tempFile = new File(placeHolder, file.getOriginalFilename() + "_" + UUID.randomUUID());
 					try {
 						file.transferTo(tempFile);
 					} catch (IllegalStateException | IOException e) {
@@ -98,7 +99,7 @@ public class ReferenceImpl implements Reference {
 		org.springframework.core.io.Resource resource = context.getResource("url://" + url);
 		if (!resource.isOpen() || !resource.isReadable())
 			throw new RuntimeException("Target resource isn't ready for processing");
-		File tempFile = new File(placeHolder);
+		File tempFile = new File(placeHolder, resource.getFilename() + "_" + UUID.randomUUID());
 		OutputStream outStream = null;
 		try {
 			outStream = new FileOutputStream(tempFile);

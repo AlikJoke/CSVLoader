@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +27,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.opencsv.CSVReader;
 
 import ru.project.csvloader.db.LoaderService;
+import ru.project.csvloader.file.pool.Pool;
+import ru.project.csvloader.file.pool.model.FileWrapper;
 import ru.project.csvloader.jdbc.utils.JdbcUtils;
 import ru.project.csvloader.model.Data;
 
@@ -42,8 +42,8 @@ import ru.project.csvloader.model.Data;
 @Service
 public class LoaderServiceImpl implements LoaderService {
 
-	@Resource(name = "placeHolder")
-	private String placeHolder;
+	@Autowired
+	private Pool pool;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -52,8 +52,8 @@ public class LoaderServiceImpl implements LoaderService {
 
 	@PostConstruct
 	public void checkInit() {
-		if (!StringUtils.hasLength(this.placeHolder))
-			throw new RuntimeException("File placeholder is empty!");
+		if (pool == null)
+			throw new RuntimeException("Files pool isn't injected!");
 
 		if (jdbcTemplate == null)
 			throw new RuntimeException("JdbcTemplate isn't injected yet!");
@@ -71,12 +71,16 @@ public class LoaderServiceImpl implements LoaderService {
 	}
 
 	@Override
-	public synchronized List<Data> loadToObjects() throws IOException {
-		if (this.getFile() == null)
+	public List<Data> loadToObjects() throws IOException {
+		final FileWrapper wrapper;
+		if ((wrapper = this.getFileWrapper()) == null)
 			return Collections.emptyList();
-		FileReader fileReader = new FileReader(this.getFile());
+		File file = wrapper.getFile();
+		if (!file.exists())
+			throw new IllegalStateException("File is deleted!");
+		FileReader fileReader = new FileReader(file);
 		CSVReader reader = new CSVReader(
-				new InputStreamReader(Files.asByteSource(this.getFile()).openStream(), fileReader.getEncoding()));
+				new InputStreamReader(Files.asByteSource(file).openStream(), fileReader.getEncoding()));
 		List<Data> dataList = Lists.newArrayList();
 		String[] line;
 		try {
@@ -84,6 +88,7 @@ public class LoaderServiceImpl implements LoaderService {
 				dataList.add(new Data(line[0], LocalDateTime.parse(line[1], DateTimeFormatter.ISO_LOCAL_DATE_TIME),
 						Double.parseDouble(line[2])));
 		} finally {
+			wrapper.markDeleted();
 			reader.close();
 			fileReader.close();
 		}
@@ -91,16 +96,13 @@ public class LoaderServiceImpl implements LoaderService {
 	}
 
 	@Override
-	public File getFile() throws IOException {
-		File file = new File(this.placeHolder);
-		if (!file.exists())
-			return null;
-		return file;
+	public FileWrapper getFileWrapper() throws IOException {
+		return pool.getFirstAvailable();
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void loadToDB() {
+	public synchronized void loadToDB() {
 		try {
 			List<Data> dataList;
 			if ((dataList = this.loadToObjects()).isEmpty())
