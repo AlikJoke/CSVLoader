@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,6 +25,10 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	@Lazy
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@Override
 	public List<User> getUsers() {
@@ -59,6 +65,7 @@ public class UserServiceImpl implements UserService {
 		if (user.getPassword() == null)
 			throw new RuntimeException("Password must be provided!");
 
+		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		user.setLastModified(LocalDateTime.now());
 		userRepository.save(user);
 	}

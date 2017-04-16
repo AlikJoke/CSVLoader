@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Past;
 
-import groovy.transform.Immutable;
+import org.hibernate.annotations.Immutable;
 
 @Immutable
 public class Data implements Serializable {
