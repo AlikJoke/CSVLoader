@@ -1,9 +1,11 @@
 package ru.project.csvloader.web.security.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import ru.project.csvloader.web.ControllerWithExceptionHandler;
@@ -15,12 +17,14 @@ public class AuthController extends ControllerWithExceptionHandler {
 	@Autowired
 	private Security security;
 
-	@RequestMapping(value = SecurityImpl.PATH_LOGIN, method = RequestMethod.POST)
+	@PostMapping(value = SecurityImpl.PATH_LOGIN)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void doLogin(@RequestParam("username") String username, @RequestParam("password") String password) {
 		security.login(username, password);
 	}
 
-	@RequestMapping(value = SecurityImpl.PATH_LOGOUT, method = RequestMethod.GET)
+	@GetMapping(value = SecurityImpl.PATH_LOGOUT)
+	@ResponseStatus(HttpStatus.OK)
 	public void doLogout() {
 		security.logout();
 	}

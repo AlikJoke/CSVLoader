@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,21 +37,21 @@ public class ControllerREST extends ControllerWithExceptionHandler {
 		ref.doOptions(request, response);
 	}
 
-	@RequestMapping(value = ReferenceImpl.PATH, method = RequestMethod.GET)
+	@GetMapping(value = ReferenceImpl.PATH)
 	@ResponseStatus(HttpStatus.OK)
 	@PreAuthorize("isAuthenticated()")
 	public List<RestResponse> doGet() {
 		return ref.doGet();
 	}
 
-	@RequestMapping(value = ReferenceImpl.PATH + "/byDate", method = RequestMethod.POST)
+	@PostMapping(value = ReferenceImpl.PATH + "/byDate")
 	@ResponseStatus(HttpStatus.OK)
 	@PreAuthorize("isAuthenticated()")
 	public RestResponse doGetByDate(@RequestParam("date") String date) {
 		return ref.doGetByDate(date);
 	}
 
-	@RequestMapping(value = ReferenceImpl.PATH, method = RequestMethod.POST)
+	@PostMapping(value = ReferenceImpl.PATH)
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostAuthorize("hasAuthority('ADMIN')")
 	public void doPostByUrl(@RequestParam("url") String url, @RequestParam("files") MultipartFile[] files) {
